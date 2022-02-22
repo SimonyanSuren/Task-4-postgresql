@@ -27,28 +27,26 @@ async function addOnePost(req, res, next) {
 async function getPost(req, res, next) {
   const postId = req.params.id;
   const result = await getPostFromDB(postId);
-  if (result == false) {
-    res.send('There is not such a post.');
-  } else {
+  if (result.length) {
     res.send(result);
+  } else {
+    res.status(404).send('There is not such a post.');
   }
 }
 
 async function putPost(req, res, next) {
-  const postId = req.get('postId');
   const changedData = req.body;
-  let result = await putPostFromDB(postId, changedData);
-  result = Object.assign(result[0], changedData);
+  let result = await putPostFromDB(changedData);
   res.send(result);
 }
 
 async function removePost(req, res, next) {
   const postId = req.params.id;
   const result = await removePostFromDB(postId);
-  if (result == false) {
-    res.send('There is not such a post.');
+  if (result.length) {
+    res.send(result); 
   } else {
-    res.send(result);
+   res.status(404).send('There is not such a post.');
   }
 }
 

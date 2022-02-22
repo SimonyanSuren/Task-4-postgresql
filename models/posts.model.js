@@ -20,7 +20,7 @@ async function fetchPosts() {
     values.push(post.body);
     values.push(post.userId);
   }
-
+ 
   const res = await client.query(query, values);
   return res.rows;
 }
@@ -44,33 +44,35 @@ async function addPostToDB(post, userId) {
   const res = await client.query(query, post);
   return res.rows;
 }
-
+  
 async function getPostFromDB(id) {
-  const res = await client.query(`SELECT * FROM "users_posts" WHERE id=${id}`);
+  const res = await client.query(`SELECT * FROM "users_posts" WHERE id=$1`, [id]);
   return res.rows;
 }
 
-async function putPostFromDB(id, data) {
+async function putPostFromDB( data) {
   const column = Object.keys(data);
   const fields = Object.values(data);
+  column.splice(0,1);
+  fields.splice(0,1);
   const res = await client.query(`UPDATE users_posts
 	 SET (${column.join()}) = ('${fields.join("','")}')
-	 WHERE id = ${id}
-	 RETURNING *`);
+	 WHERE id = $1
+	 RETURNING *`, [data.postId]);
   return res.rows;
 }
-
+ 
 async function removePostFromDB(id) {
-  const res = await client.query(`DELETE FROM users_posts WHERE id = ${id}
-	RETURNING *`);
+  const res = await client.query(`DELETE FROM users_posts WHERE id = $1
+	RETURNING *`, [id]);
   return res.rows;
 }
 
 async function tableHasRow() {
   const res = await client.query(
-    `SELECT EXISTS(SELECT * FROM users_posts) AS HAS_ROW`
+    `SELECT * FROM users_posts`
   );
-  return res.rows[0].has_row;
+  return res.rows.length > 0;
 }
 
 module.exports = {

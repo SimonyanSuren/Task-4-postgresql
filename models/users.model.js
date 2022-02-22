@@ -36,15 +36,73 @@ async function getUsersFromDB() {
 }
 
 async function removeUsersFromDB() {
-  const res = await client.query(`DELETE FROM "users_info"`);
-  return res.rowCount;
+  const res = await client.query(`DELETE FROM "users_info" RETURNING *`);
+  return res.rows;
 }
 
 async function tableHasRow() {
-  const res = await client.query(
-    `SELECT EXISTS(SELECT * FROM users_info) AS HAS_ROW`
-  );
-  return res.rows[0].has_row;
+  const res = await client.query(`SELECT * FROM users_info`);
+  return res.rows.length > 0;
 }
 
-module.exports = { fetchUsers, getUsersFromDB, removeUsersFromDB, tableHasRow };
+async function addUserToDB(user) {
+  const lastUserId =
+    await client.query(`SELECT id FROM users_info ORDER BY id DESC LIMIT 1
+	 `);
+  const lastId = lastUserId.rows[0].id + 1;
+  let query = `INSERT INTO "users_info" (name, username, email, phone, website, address, id) VALUES`;
+  user = Object.values(user);
+  user.push(lastId);
+  for (let i = 1; i <= user.length; i++) {
+    query += `${i === 1 ? ' (' : ''}$${i}${
+      i !== user.length ? ',' : ') RETURNING *'
+    }`;
+    if (typeof user[i] === 'object') {
+      user[i] = JSON.stringify(user[i]);
+    }
+  }
+  const res = await client.query(query, user);
+  return res.rows;
+}
+
+async function getOneUserFromDB(id) {
+  const res = await client.query(`SELECT * FROM "users_info" WHERE id=$1`, [
+    id,
+  ]);
+  return res.rows;
+}
+
+async function putOneUserFromDB(data) {
+  const column = Object.keys(data);
+  const fields = Object.values(data);
+  column.splice(0, 1);
+  fields.splice(0, 1);
+  const res = await client.query(
+    `UPDATE users_info
+	 SET (${column.join()}) = ('${fields.join("','")}')
+	 WHERE id =$1
+	 RETURNING *`,
+    [data.userId]
+  );
+  return res.rows;
+}
+
+async function removeOneUserFromDB(id) {
+  const res = await client.query(
+    `DELETE FROM users_info WHERE id = $1
+	 RETURNING *`,
+    [id]
+  );
+  return res.rows;
+}
+
+module.exports = {
+  fetchUsers,
+  getUsersFromDB,
+  removeUsersFromDB,
+  tableHasRow,
+  addUserToDB,
+  getOneUserFromDB,
+  putOneUserFromDB,
+  removeOneUserFromDB,
+};
