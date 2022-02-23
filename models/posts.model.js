@@ -28,7 +28,7 @@ async function fetchPosts() {
 async function addPostToDB(post, userId) {
   const lastPostId =
     await client.query(`SELECT id FROM users_posts ORDER BY id DESC LIMIT 1
-	 `);
+	 `); 
   const lastId = lastPostId.rows[0].id + 1;
   let query = `INSERT INTO users_posts (title, body, id, user_id) VALUES`;
   post = Object.values(post);
@@ -58,7 +58,7 @@ async function putPostFromDB( data) {
   const res = await client.query(`UPDATE users_posts
 	 SET (${column.join()}) = ('${fields.join("','")}')
 	 WHERE id = $1
-	 RETURNING *`, [data.postId]);
+	 RETURNING *`, [data.id]);
   return res.rows;
 }
  

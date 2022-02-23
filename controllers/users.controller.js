@@ -10,8 +10,8 @@ const {
 } = require('../models/users.model');
 
 async function addUsers(req, res, next) {
-  let boolean = await tableHasRow();
-  if (!boolean) {
+  let ifTabRowExists = await tableHasRow();
+  if (!ifTabRowExists) {
     const fetchedUsers = await fetchUsers();
     res.send(fetchedUsers);
   } else {
@@ -22,8 +22,7 @@ async function addUsers(req, res, next) {
 async function getUsers(req, res, next) {
   const result = await getUsersFromDB();
   if (result.length) {
-   res.send(result); 
-    return;
+   return res.send(result); 
   }
   res.send('There are no users to get.');
 }
@@ -31,8 +30,7 @@ async function getUsers(req, res, next) {
 async function removeUsers(req, res, next) {
   const result = await removeUsersFromDB();
   if (result.length) {
-    res.send('Users deleted.');
-    return;
+    return res.send('Users deleted.'); 
   }
   res.status(404).send('There are no users to delete.');
 }
@@ -56,8 +54,7 @@ async function putOneUser(req, res, next) {
   const changedData = req.body;
   let result = await putOneUserFromDB(changedData);
   if(result.length) {
-	    res.send(result);
-	return
+	  return res.send(result);
   }
   res.status(404).send('There are not such a user')
 }

@@ -8,8 +8,8 @@ const {
 } = require('../models/posts.model');
 
 async function addPosts(req, res, next) {
-  let boolean = await tableHasRow();
-  if (!boolean) {
+  const ifTabRowExists = await tableHasRow();
+  if (!ifTabRowExists) {
     const fetchedPosts = await fetchPosts();
     res.send(fetchedPosts);
   } else {
