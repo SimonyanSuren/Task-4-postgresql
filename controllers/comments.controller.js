@@ -14,7 +14,7 @@ const addComment = async (req, res, next) => {
   const commentData = req.body;
   const result = await model.addComment(commentData);
   res.send(result);
-};
+};  
 
 const getComment = async (req, res, next) => {
   const commentId = req.params.id;

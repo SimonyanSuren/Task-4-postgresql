@@ -75,6 +75,15 @@ async function tableHasRow() {
   return res.rows.length > 0;
 }
 
+async function getPostandCommnetsFromDB(id) {
+	const comments = await client.query(`Select * from "users_comments" uc 
+	WHERE uc."post_id"= $1`, [id]);
+	const post = await client.query(`Select * from "users_posts" 
+	WHERE id= $1`, [id]);
+	post.rows[0]['comments'] = comments.rows
+	return post.rows;
+ }
+
 module.exports = {
   fetchPosts,
   tableHasRow,
@@ -82,4 +91,5 @@ module.exports = {
   getPostFromDB,
   putPostFromDB,
   removePostFromDB,
+  getPostandCommnetsFromDB
 };
